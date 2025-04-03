@@ -29,7 +29,7 @@ func NewRSEncoder2(field *gf.GF, dataShards, parityShards int) *RSEncoder2 {
 func (enc *RSEncoder2) generateEvalPoints() {
 	enc.evalPoints = make([]byte, enc.totalShards)
 
-	// 使用连续整数作为评估点 (从1开始)
+	// Use consecutive integers as evaluation points (starting from 1)
 	for i := 0; i < enc.totalShards; i++ {
 		enc.evalPoints[i] = byte(i + 1)
 	}
@@ -45,7 +45,7 @@ func (enc *RSEncoder2) Encode(message []byte) []byte {
 	encoded := make([]byte, enc.totalShards)
 	copy(encoded, message)
 
-	// 使用拉格朗日插值计算冗余数据
+	// Use Lagrange interpolation to calculate redundant data
 	enc.lagrangeInterpolation(message, encoded)
 
 	return encoded
@@ -53,30 +53,30 @@ func (enc *RSEncoder2) Encode(message []byte) []byte {
 
 // lagrangeInterpolation calculates redundant shards using Lagrange interpolation
 func (enc *RSEncoder2) lagrangeInterpolation(message []byte, encoded []byte) {
-	// 对每个冗余分片位置
+	// For each redundant shard position
 	for i := enc.dataShards; i < enc.totalShards; i++ {
-		// 计算多项式在此点的值
+		// Calculate the value of the polynomial at this point
 		result := byte(0)
 
-		// 构建拉格朗日插值多项式
+		// Build the Lagrange interpolation polynomial
 		for j := 0; j < enc.dataShards; j++ {
 			term := message[j]
 
-			// 计算拉格朗日基函数
+			// Calculate the Lagrange basis function
 			for k := 0; k < enc.dataShards; k++ {
 				if j != k {
-					// 计算 (x - x_k)
+					// Calculate (x - x_k)
 					numerator := enc.field.Sub(enc.evalPoints[i], enc.evalPoints[k])
-					// 计算 (x_j - x_k)
+					// Calculate (x_j - x_k)
 					denominator := enc.field.Sub(enc.evalPoints[j], enc.evalPoints[k])
-					// 除法
+					// Division
 					factor := enc.field.Div(numerator, denominator)
-					// 乘以当前项
+					// Multiply by the current term
 					term = enc.field.Mul(term, factor)
 				}
 			}
 
-			// 将此项添加到结果中
+			// Add this term to the result
 			result = enc.field.Add(result, term)
 		}
 
@@ -94,14 +94,14 @@ func (enc *RSEncoder2) EncodeEfficient(message []byte) []byte {
 	encoded := make([]byte, enc.totalShards)
 	copy(encoded, message)
 
-	// 对每个冗余分片位置
+	// For each redundant shard position
 	for i := enc.dataShards; i < enc.totalShards; i++ {
 		result := byte(0)
 
-		// 获取评估点
+		// Get the evaluation point
 		x := enc.evalPoints[i]
 
-		// 使用霍纳方法计算多项式值
+		// Use Horner's method to calculate the polynomial value
 		// p(x) = message[0] + message[1]*x + message[2]*x^2 + ... + message[dataShards-1]*x^(dataShards-1)
 		for j := enc.dataShards - 1; j >= 0; j-- {
 			result = enc.field.Add(enc.field.Mul(result, x), message[j])
@@ -120,37 +120,37 @@ func (enc *RSEncoder2) ReconstructData(availableShards []byte, availableIndices 
 		panic("Not enough shards to reconstruct data")
 	}
 
-	// 只需要数据分片数量的分片来重建
+	// Only need the number of data shards to reconstruct
 	shards := availableShards[:enc.dataShards]
 	indices := availableIndices[:enc.dataShards]
 
-	// 创建原始数据数组
+	// Create original data array
 	originalData := make([]byte, enc.dataShards)
 
-	// 对每个数据位置
+	// For each data position
 	for i := 0; i < enc.dataShards; i++ {
-		// 计算插值结果
+		// Calculate interpolation result
 		result := byte(0)
 
-		// 使用拉格朗日插值恢复原始数据
+		// Use Lagrange interpolation to recover original data
 		for j := 0; j < enc.dataShards; j++ {
 			term := shards[j]
 
-			// 计算拉格朗日基函数
+			// Calculate the Lagrange basis function
 			for k := 0; k < enc.dataShards; k++ {
 				if j != k {
-					// 计算 (x_i - x_k)
+					// Calculate (x_i - x_k)
 					numerator := enc.field.Sub(enc.evalPoints[i], enc.evalPoints[indices[k]])
-					// 计算 (x_j - x_k)
+					// Calculate (x_j - x_k)
 					denominator := enc.field.Sub(enc.evalPoints[indices[j]], enc.evalPoints[indices[k]])
-					// 除法
+					// Division
 					factor := enc.field.Div(numerator, denominator)
-					// 乘以当前项
+					// Multiply by the current term
 					term = enc.field.Mul(term, factor)
 				}
 			}
 
-			// 将此项添加到结果中
+			// Add this term to the result
 			result = enc.field.Add(result, term)
 		}
 
