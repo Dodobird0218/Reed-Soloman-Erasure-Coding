@@ -1,5 +1,3 @@
-lagrange-rs-encoder/go.mod
-vandermonde-rs-encoder/go.mod
 lagrange-rs-encoder/test/*
 lagrange-rs-encoder/rs-encoder
 vandermonde-rs-encoder/rs-encoder
