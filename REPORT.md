@@ -4,37 +4,37 @@
 
 此篇報告為介紹Reed-Solomon擦除碼理論以及如何實現，透過Lagrange插值法和Vandermonde矩陣矩陣生成法兩種方式來實現，並且證實這兩種方法的編碼和解碼結果一致。
 
-## 1.1 Erasure Coding 程式碼簡介
+### 1.1 Erasure Coding 程式碼簡介
 
-### 1.1.1 共同程式
+#### 1.1.1 共同程式
 
 共同程式係指Lagrange & Vandermonde方法都會使用到的程式碼，主要是需要有相同的有限域定義，才能讓兩種方法的編解碼結果相同。此章節僅介紹架構，並會在後續章節做更詳細的推導或說明。
 
-#### @field.go
+##### @field.go
 定義了有限域 GF(2^8) 的實現，提供基本的數學運算功能，包括加法、減法（異或運算）、乘法、除法、冪運算和乘法逆元計算。核心邏輯基於指數表和對數表來加速運算，並使用本原多項式生成這些表格。
 
 有限域是編解碼運算的規則和基礎，並會在後面章節詳細介紹其理論。
 
-#### 編碼主程式 @encode_main.go
+##### 編碼主程式 @encode_main.go
 - 讀取輸入 JSON 檔案獲取原始訊息
 - 初始化有限域和 Reed-Solomon 編碼器
 - 對原始訊息進行編碼
 - 將編碼結果輸出到 JSON 檔案
 
-#### 解碼主程式 @decode_main.go
+##### 解碼主程式 @decode_main.go
 - 讀取包含編碼分片的 JSON 檔案
 - 初始化 Reed-Solomon 解碼器
 - 從分片恢復原始訊息
 - 將解碼結果保存到 JSON 檔案
 
-### 1.1.2 編解碼
+#### 1.1.2 編解碼
 
-#### @encoder.go @decoder.go
+##### @encoder.go @decoder.go
 Lagrange和Vandermonde方法有各自的編碼和解碼器，後續章節會說明理論基礎。
 
-## 1.2 測試檔案
+### 1.2 測試檔案
 
-### input for encoder
+#### input for encoder
 有兩筆資料，分別為[0 1 2 3 4 5]和[8 6 0 13 128 109]，此專案將訊息轉換為16進制表示。
 根據作業要求，**將input6個shards編碼為輸出的18個shards**，其中前6個shards和原始數據相同。
 
@@ -127,7 +127,7 @@ Lagrange和Vandermonde方法有各自的編碼和解碼器，後續章節會說�
 ```
 
 
-### input for decoder
+#### input for decoder
 根據Erasure Coding的特性，只要編碼結果有其中六組連續的shards，就算其他數據丟失，也能夠還原成原始的message。
 根據作業要求，在此專案中我們分別取編碼結果的中間六個shards和最後六個shards作為解碼input，並期望輸出能解碼成原始數據。
 
