@@ -2,7 +2,7 @@
 
 ## 1. Introduction
 
-此篇報告為介紹Reed-Solomon擦除碼理論以及如何實現，透過Lagrange插值法和Vandermonde矩陣矩陣生成法兩種方式來實現，並且證實這兩種方法的編碼和解碼結果一致。
+此篇報告為介紹Reed-Solomon擦除碼理論以及如何實現，透過Lagrange插值法和Vandermonde矩陣生成法兩種方式來實現，並且證實這兩種方法的編碼和解碼結果一致。
 
 ### 1.1 Erasure Coding 程式碼簡介
 
